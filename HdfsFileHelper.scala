@@ -18,40 +18,37 @@ class HdfsFileHelper {
 
   def mkdirs(folderPath: String): Unit = {
     val path = new Path(folderPath)
-    if (!fileSystem.exists(path)) {
+    if (!fileSystem.exists(path))
       fileSystem.mkdirs(path)
-    }
   }
 
   def getFiles(folderPath: String) : MutableList[String] = {
     val path = new Path(folderPath)
-    val tmp = MutableList[String]()
+    val ret = MutableList[String]()
     if(!fileSystem.exists(path))
       MutableList[String]()
     else {
-     val files = fileSystem.listFiles(path ,true)
+      val files = fileSystem.listFiles(path ,true)
       while (files.hasNext) {
         val status = files.next()
         if (status.isFile && !status.getPath.getName.startsWith("_") ) {
-          tmp.append(status.getPath.toString)
+          ret.append(status.getPath.toString)
         }
       }
     }
-    tmp
+    ret
   }
 
-  def createNewFile(filepath: String): Unit = {
+  def createNewFile(filepath: String): Boolean = {
     val file = new File(filepath)
-    val out = fileSystem.createNewFile(new Path(file.getAbsolutePath))
-    if (out)
-      println("New file created as " + file.getAbsolutePath)
+    if (fileSystem.createNewFile(new Path(file.getAbsolutePath)))
+      true
     else
-      println("File cannot be created : " + file.getAbsolutePath)
+      false
   }
 
   def reader(filenamePath : String): Array[String] ={
-    val path = new Path(filenamePath)
-    val out = fileSystem.open(path)
+    val out = fileSystem.open(new Path(filenamePath))
     val data : Array[String]= out.readUTF().split("\n")
     data
   }
@@ -72,7 +69,7 @@ class HdfsFileHelper {
 
   def deleteFolder(filename: String): Boolean = {
     val path = new Path(filename)
-    fileSystem.delete(path, true) 
+    fileSystem.delete(path, true)
   }
 
   def close() = {
